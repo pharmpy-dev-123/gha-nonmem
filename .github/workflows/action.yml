@@ -1,0 +1,181 @@
+name: build
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Cache NONMEM fetch
+        id: cache-nonmem-fetch
+        uses: actions/cache@v2
+        with:
+            path: 751.zip
+            key: nonmem-751
+
+      - name: Fetch NONMEM
+        if: steps.cache-nonmem-fetch.outputs.cache-hit != 'true'
+        run: |
+          sudo apt install lynx
+          echo 'key /' >>lynxcmds
+          echo 'key 7' >>lynxcmds
+          echo 'key 5' >>lynxcmds
+          echo 'key 1' >>lynxcmds
+          echo 'key ^J' >>lynxcmds
+          echo 'key ^J' >>lynxcmds
+          echo 'key /' >>lynxcmds
+          echo 'key z' >>lynxcmds
+          echo 'key i' >>lynxcmds
+          echo 'key p' >>lynxcmds
+          echo 'key ^J' >>lynxcmds
+          echo 'key d' >>lynxcmds
+          echo 'key ^J' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key <delete>' >>lynxcmds
+          echo 'key 7' >>lynxcmds
+          echo 'key 5' >>lynxcmds
+          echo 'key 1' >>lynxcmds
+          echo 'key .' >>lynxcmds
+          echo 'key z' >>lynxcmds
+          echo 'key i' >>lynxcmds
+          echo 'key p' >>lynxcmds
+          echo 'key ^J' >>lynxcmds
+          echo 'key Q' >>lynxcmds
+          lynx -accept-all-cookies nonmem.iconplc.com -cmd_script=lynxcmds
+
+      - name: Upload NONMEM ZIP file
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifact-nonmem-751-zip
+          path: 751.zip
+
+  build-ubuntu:
+    needs: [fetch]
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Get NONMEM
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-nonmem-751-zip
+
+      - name: Unzip NONMEM
+        env:
+          ZIP_KEY: ${{secrets.NONMEM_751_ZIP_KEY}}
+        run: unzip -P $ZIP_KEY 751.zip
+
+      - name: Install gfortran
+        run: sudo apt install gfortran
+
+      - name: Build NONMEM
+        run: |
+          cd nm751CD
+          /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q
+
+      - name: NONMEM license
+        run: echo $NONMEM_LICENSE_KEY > nm751/license/nonmem.lic
+        env:
+          NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
+
+  build-macos:
+    needs: [fetch]
+    runs-on: macos-latest
+    steps:
+
+      - name: Setup gfortran
+        run: |
+          sudo ln -s /usr/local/bin/gfortran-9 /usr/local/bin/gfortran
+          sudo mkdir /usr/local/gfortran
+          sudo ln -s /usr/local/Cellar/gcc@9/9.3.0_1/lib/gcc/9 /usr/local/gfortran/lib
+
+      - name: Install realpath
+        run: brew install coreutils
+
+      - name: Get NONMEM
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact-nonmem-751-zip
+
+      - name: Unzip NONMEM
+        env:
+          ZIP_KEY: ${{secrets.NONMEM_751_ZIP_KEY}}
+        run: unzip -P $ZIP_KEY 751.zip
+
+      - name: Build NONMEM
+        run: |
+          cd nm751CD
+          /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q
+
+      - name: NONMEM license
+        run: echo $NONMEM_LICENSE_KEY > nm751/license/nonmem.lic
+        env:
+          NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
+
+  build-windows:
+      needs: [fetch]
+      runs-on: windows-latest
+      steps:
+
+        - name: Get NONMEM
+          uses: actions/download-artifact@v2
+          with:
+              name: artifact-nonmem-751-zip
+
+        - name: Unzip NONMEM
+          env:
+            ZIP_KEY: ${{secrets.NONMEM_751_ZIP_KEY}}
+          run: 7z x 751.zip -p%ZIP_KEY%
+          shell: cmd
+
+        - name: NONMEM license
+          run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
+          env:
+            NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
+          shell: bash
+
+        - name: Install NONMEM
+          run: |
+            set INSTALLDIR=%CD%\nm751
+            cd nm751CD
+            SETUP75.bat %CD% %INSTALLDIR% gfortran y ar same rec q
+          shell: cmd
