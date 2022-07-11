@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 jobs:
@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Get NONMEM
+      - name: Fetch NONMEM
         uses: actions/download-artifact@v2
         with:
           name: artifact-nonmem-751-zip
@@ -107,15 +107,17 @@ jobs:
       - name: Install gfortran
         run: sudo apt install gfortran
 
+      - name: Copy NONMEM license
+        run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
+        env:
+          NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
+        shell: bash
+
       - name: Build NONMEM
         run: |
           cd nm751CD
           /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q
 
-      - name: NONMEM license
-        run: echo $NONMEM_LICENSE_KEY > nm751/license/nonmem.lic
-        env:
-          NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
 
   build-macos:
     needs: [fetch]
@@ -131,7 +133,7 @@ jobs:
       - name: Install realpath
         run: brew install coreutils
 
-      - name: Get NONMEM
+      - name: Fetch NONMEM
         uses: actions/download-artifact@v2
         with:
           name: artifact-nonmem-751-zip
@@ -141,41 +143,43 @@ jobs:
           ZIP_KEY: ${{secrets.NONMEM_751_ZIP_KEY}}
         run: unzip -P $ZIP_KEY 751.zip
 
+      - name: Copy NONMEM license
+        run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
+        env:
+          NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
+        shell: bash
+
       - name: Build NONMEM
         run: |
           cd nm751CD
           /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q
 
-      - name: NONMEM license
-        run: echo $NONMEM_LICENSE_KEY > nm751/license/nonmem.lic
-        env:
-          NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
 
   build-windows:
-      needs: [fetch]
-      runs-on: windows-latest
-      steps:
+    needs: [fetch]
+    runs-on: windows-latest
+    steps:
 
-        - name: Get NONMEM
-          uses: actions/download-artifact@v2
-          with:
-              name: artifact-nonmem-751-zip
+      - name: Fetch NONMEM
+        uses: actions/download-artifact@v2
+        with:
+            name: artifact-nonmem-751-zip
 
-        - name: Unzip NONMEM
-          env:
-            ZIP_KEY: ${{secrets.NONMEM_751_ZIP_KEY}}
-          run: 7z x 751.zip -p%ZIP_KEY%
-          shell: cmd
+      - name: Unzip NONMEM
+        env:
+          ZIP_KEY: ${{secrets.NONMEM_751_ZIP_KEY}}
+        run: 7z x 751.zip -p%ZIP_KEY%
+        shell: cmd
 
-        - name: NONMEM license
-          run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
-          env:
-            NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
-          shell: bash
+      - name: Copy NONMEM license
+        run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
+        env:
+          NONMEM_LICENSE_KEY: ${{secrets.NONMEM_LICENSE_KEY}}
+        shell: bash
 
-        - name: Install NONMEM
-          run: |
-            set INSTALLDIR=%CD%\nm751
-            cd nm751CD
-            SETUP75.bat %CD% %INSTALLDIR% gfortran y ar same rec q
-          shell: cmd
+      - name: Build NONMEM
+        run: |
+          set INSTALLDIR=%CD%\nm751
+          cd nm751CD
+          SETUP75.bat %CD% %INSTALLDIR% gfortran y ar same rec q
+        shell: cmd
