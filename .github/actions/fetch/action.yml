@@ -87,5 +87,6 @@ runs:
     - name: Upload NONMEM ZIP file
       uses: actions/upload-artifact@v3
       with:
+        retention-days: 1
         name: ${{ inputs.archive-artifact }}
         path: 751.zip
