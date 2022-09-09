@@ -15,7 +15,7 @@ jobs:
 
       - name: Cache NONMEM fetch
         id: cache-nonmem-fetch
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
             path: 751.zip
             key: nonmem-751
@@ -84,7 +84,7 @@ jobs:
           lynx -accept-all-cookies nonmem.iconplc.com -cmd_script=lynxcmds
 
       - name: Upload NONMEM ZIP file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: artifact-nonmem-751-zip
           path: 751.zip
@@ -95,7 +95,7 @@ jobs:
     steps:
 
       - name: Fetch NONMEM
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: artifact-nonmem-751-zip
 
@@ -134,7 +134,7 @@ jobs:
         run: brew install coreutils
 
       - name: Fetch NONMEM
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: artifact-nonmem-751-zip
 
@@ -161,7 +161,7 @@ jobs:
     steps:
 
       - name: Fetch NONMEM
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
             name: artifact-nonmem-751-zip
 
