@@ -1,0 +1,42 @@
+name: 'Compile NONMEM on Linux'
+inputs:
+  archive-artifact:
+    description: 'The artifact name to use to download the archive'
+    required: true
+  nonmem-zip-key:
+    description: 'The NONMEM ZIP key'
+    required: True
+  nonmem-license-key:
+    description: 'The NONMEM license key'
+    required: True
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install gfortran
+      shell: bash
+      run: sudo apt install gfortran
+
+    - name: Fetch archive
+      id: download
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.archive-artifact }}
+
+    - name: Unzip NONMEM
+      shell: bash
+      env:
+        SECRET_ZIP_KEY: ${{ inputs.nonmem-zip-key }}
+      run: unzip -P $SECRET_ZIP_KEY 751.zip
+
+    - name: Copy NONMEM license
+      shell: bash
+      run: echo $SECRET_LICENSE_KEY > nm751CD/nonmem.lic
+      env:
+        SECRET_LICENSE_KEY: ${{ inputs.nonmem-license-key }}
+
+    - name: Build NONMEM
+      shell: bash
+      run: |
+        cd nm751CD
+        /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q

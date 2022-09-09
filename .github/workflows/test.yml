@@ -1,0 +1,43 @@
+name: test
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Fetch NONMEM
+        uses: ./.github/actions/fetch
+        with:
+          archive-artifact: artifact-nonmem-751-zip
+          nonmem-version: '7.5.1'
+
+
+  build:
+    needs: [fetch]
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-22.04, ubuntu-20.04, ubuntu-18.04, macos-12, macos-11, macos-10.15, windows-2022, windows-2019]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Compile NONMEM
+        uses: ./.github/actions/compile
+        with:
+          archive-artifact: artifact-nonmem-751-zip
+          nonmem-zip-key: ${{secrets.NONMEM_751_ZIP_KEY}}
+          nonmem-license-key: ${{secrets.NONMEM_LICENSE_KEY}}
