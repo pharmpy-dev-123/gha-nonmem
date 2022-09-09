@@ -1,16 +1,13 @@
-name: 'Hello World'
-description: 'Greet someone'
+name: 'Fetch NONMEM'
+description: 'Fetch a specific NONMEM version zip archive'
 inputs:
+  archive-artifact:
+    description: 'The artifact name to use to upload the archive'
+    required: true
   nonmem-version:
     description: 'The NONMEM version to install'
     required: false
     default: '7.5.1'
-  nonmem-license-key:
-    description: 'The NONMEM license key'
-    required: True
-  nonmem-zip-key:
-    description: 'The NONMEM ZIP key'
-    required: True
 
 runs:
   using: "composite"
@@ -25,6 +22,7 @@ runs:
 
     - name: Fetch NONMEM
       if: steps.cache-nonmem-fetch.outputs.cache-hit != 'true'
+      shell: bash
       run: |
         sudo apt install lynx
         echo 'key /' >>lynxcmds
@@ -86,97 +84,8 @@ runs:
         echo 'key Q' >>lynxcmds
         lynx -accept-all-cookies nonmem.iconplc.com -cmd_script=lynxcmds
 
-    - if: runner.os == 'Linux'
-
     - name: Upload NONMEM ZIP file
       uses: actions/upload-artifact@v3
       with:
-        name: artifact-nonmem-751-zip
+        name: ${{ inputs.archive-artifact }}
         path: 751.zip
-
-      name: Fetch NONMEM
-      uses: actions/download-artifact@v3
-      with:
-        name: artifact-nonmem-751-zip
-
-    - name: Unzip NONMEM
-      env:
-        ZIP_KEY: ${{ inputs.nonmem-zip-key }}
-      run: unzip -P $ZIP_KEY 751.zip
-
-    - name: Install gfortran
-      run: sudo apt install gfortran
-
-    - name: Copy NONMEM license
-      run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
-      env:
-        NONMEM_LICENSE_KEY: ${{ inputs.nonmem-license-key }}
-      shell: bash
-
-    - name: Build NONMEM
-      run: |
-        cd nm751CD
-        /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q
-
-
-build-macos:
-  if: runner.os == 'macOS'
-  needs: [fetch]
-  runs-on: macos-latest
-  steps:
-
-    - name: Setup gfortran
-      run: |
-        sudo ln -s /usr/local/bin/gfortran-9 /usr/local/bin/gfortran
-        sudo mkdir /usr/local/gfortran
-        sudo ln -s /usr/local/Cellar/gcc@9/9.3.0_1/lib/gcc/9 /usr/local/gfortran/lib
-
-    - name: Install realpath
-      run: brew install coreutils
-
-    - name: Fetch NONMEM
-      uses: actions/download-artifact@v3
-      with:
-        name: artifact-nonmem-751-zip
-
-    - name: Copy NONMEM license
-      run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
-      env:
-        NONMEM_LICENSE_KEY: ${{ inputs.nonmem-license-key }}
-      shell: bash
-
-    - name: Build NONMEM
-      run: |
-        cd nm751CD
-        /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q
-
-
-build-windows:
-  if: runner.os == 'Windows'
-  needs: [fetch]
-  runs-on: windows-latest
-  steps:
-
-    - name: Fetch NONMEM
-      uses: actions/download-artifact@v3
-      with:
-          name: artifact-nonmem-751-zip
-
-    - name: Unzip NONMEM
-      env:
-        ZIP_KEY: ${{ inputs.nonmem-zip-key }}
-      run: 7z x 751.zip -p%ZIP_KEY%
-      shell: cmd
-
-    - name: Copy NONMEM license
-      run: echo $NONMEM_LICENSE_KEY > nm751CD/nonmem.lic
-      env:
-        NONMEM_LICENSE_KEY: ${{ inputs.nonmem-license-key }}
-      shell: bash
-
-    - name: Build NONMEM
-      run: |
-        set INSTALLDIR=%CD%\nm751
-        cd nm751CD
-        SETUP75.bat %CD% %INSTALLDIR% gfortran y ar same rec q
-      shell: cmd

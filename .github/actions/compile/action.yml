@@ -1,0 +1,35 @@
+name: 'Compile NONMEM'
+inputs:
+  archive-artifact:
+    description: 'The artifact name to use to download the archive'
+    required: true
+  nonmem-zip-key:
+    description: 'The NONMEM ZIP key'
+    required: True
+  nonmem-license-key:
+    description: 'The NONMEM license key'
+    required: True
+
+runs:
+  using: "composite"
+  steps:
+    - if: runner.os == 'Linux'
+      uses: ./.github/actions/compile-linux
+      with:
+        archive-artifact: ${{inputs.archive-artifact}}
+        nonmem-zip-key: ${{inputs.nonmem-zip-key}}
+        nonmem-license-key: ${{inputs.nonmem-license-key}}
+
+    - if: runner.os == 'macOS'
+      uses: ./.github/actions/compile-macos
+      with:
+        archive-artifact: ${{inputs.archive-artifact}}
+        nonmem-zip-key: ${{inputs.nonmem-zip-key}}
+        nonmem-license-key: ${{inputs.nonmem-license-key}}
+
+    - if: runner.os == 'Windows'
+      uses: ./.github/actions/compile-windows
+      with:
+        archive-artifact: ${{inputs.archive-artifact}}
+        nonmem-zip-key: ${{inputs.nonmem-zip-key}}
+        nonmem-license-key: ${{inputs.nonmem-license-key}}
