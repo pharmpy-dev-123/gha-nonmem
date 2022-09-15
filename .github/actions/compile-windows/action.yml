@@ -33,17 +33,17 @@ runs:
       shell: cmd
       env:
         SECRET_ZIP_KEY: ${{ inputs.nonmem-zip-key }}
-      run: 7z x 751.zip -p%SECRET_ZIP_KEY%
+      run: 7z x 744.zip -p%SECRET_ZIP_KEY%
 
     - name: Copy NONMEM license
       shell: bash
-      run: echo $SECRET_LICENSE_KEY > nm751CD/nonmem.lic
+      run: echo $SECRET_LICENSE_KEY > nm744CD/nonmem.lic
       env:
         SECRET_LICENSE_KEY: ${{ inputs.nonmem-license-key }}
 
     - name: Build NONMEM
       shell: cmd
       run: |
-        set INSTALLDIR=%CD%\nm751
-        cd nm751CD
-        SETUP75.bat %CD% %INSTALLDIR% gfortran y ar same rec q
+        set INSTALLDIR=%CD%\nm744
+        cd nm744CD
+        SETUP74.bat %CD% %INSTALLDIR% gfortran y ar same rec q

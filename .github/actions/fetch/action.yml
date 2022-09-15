@@ -7,7 +7,7 @@ inputs:
   nonmem-version:
     description: 'The NONMEM version to install'
     required: false
-    default: '7.5.1'
+    default: '7.4.4'
 
 runs:
   using: "composite"
@@ -17,8 +17,8 @@ runs:
       id: cache-nonmem-fetch
       uses: actions/cache@v3
       with:
-          path: 751.zip
-          key: nonmem-751
+          path: 744.zip
+          key: nonmem-744
 
     - name: Fetch NONMEM
       if: steps.cache-nonmem-fetch.outputs.cache-hit != 'true'
@@ -27,8 +27,8 @@ runs:
         sudo apt install lynx
         echo 'key /' >>lynxcmds
         echo 'key 7' >>lynxcmds
-        echo 'key 5' >>lynxcmds
-        echo 'key 1' >>lynxcmds
+        echo 'key 4' >>lynxcmds
+        echo 'key 4' >>lynxcmds
         echo 'key ^J' >>lynxcmds
         echo 'key ^J' >>lynxcmds
         echo 'key /' >>lynxcmds
@@ -74,8 +74,8 @@ runs:
         echo 'key <delete>' >>lynxcmds
         echo 'key <delete>' >>lynxcmds
         echo 'key 7' >>lynxcmds
-        echo 'key 5' >>lynxcmds
-        echo 'key 1' >>lynxcmds
+        echo 'key 4' >>lynxcmds
+        echo 'key 4' >>lynxcmds
         echo 'key .' >>lynxcmds
         echo 'key z' >>lynxcmds
         echo 'key i' >>lynxcmds
@@ -89,4 +89,4 @@ runs:
       with:
         retention-days: 1
         name: ${{ inputs.archive-artifact }}
-        path: 751.zip
+        path: 744.zip

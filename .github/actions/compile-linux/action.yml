@@ -27,16 +27,16 @@ runs:
       shell: bash
       env:
         SECRET_ZIP_KEY: ${{ inputs.nonmem-zip-key }}
-      run: unzip -P $SECRET_ZIP_KEY 751.zip
+      run: unzip -P $SECRET_ZIP_KEY 744.zip
 
     - name: Copy NONMEM license
       shell: bash
-      run: echo $SECRET_LICENSE_KEY > nm751CD/nonmem.lic
+      run: echo $SECRET_LICENSE_KEY > nm744CD/nonmem.lic
       env:
         SECRET_LICENSE_KEY: ${{ inputs.nonmem-license-key }}
 
     - name: Build NONMEM
       shell: bash
       run: |
-        cd nm751CD
-        /bin/bash SETUP75 $(realpath .) $(realpath ../nm751) gfortran y ar same rec q
+        cd nm744CD
+        /bin/bash SETUP74 $(realpath .) $(realpath ../nm744) gfortran y ar same rec q
