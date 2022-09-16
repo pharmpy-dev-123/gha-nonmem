@@ -20,8 +20,8 @@ jobs:
       - name: Fetch NONMEM
         uses: ./.github/actions/fetch
         with:
-          archive-artifact: artifact-nonmem-751-zip
-          nonmem-version: '7.5.1'
+          archive-artifact: artifact-nonmem-744-zip
+          nonmem-version: '7.4.4'
 
 
   build:
@@ -39,6 +39,6 @@ jobs:
       - name: Compile NONMEM
         uses: ./.github/actions/compile
         with:
-          archive-artifact: artifact-nonmem-751-zip
-          nonmem-zip-key: ${{secrets.NONMEM_751_ZIP_KEY}}
+          archive-artifact: artifact-nonmem-744-zip
+          nonmem-zip-key: ${{secrets.NONMEM_744_ZIP_KEY}}
           nonmem-license-key: ${{secrets.NONMEM_LICENSE_KEY}}
